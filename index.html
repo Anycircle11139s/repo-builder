@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stardance Project Studio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="app">
+
+    <aside class="sidebar">
+      <header class="brand">
+        <span class="brand-mark">S</span>
+        <div>
+          <h1>Project Studio</h1>
+          <p>Build a repo for your Stardance project</p>
+        </div>
+      </header>
+
+      <nav class="steps" id="stepNav">
+        <button class="step active" data-step="0">
+          <span class="step-dot">1</span>
+          <span class="step-label">Connect GitHub</span>
+        </button>
+        <button class="step" data-step="1">
+          <span class="step-dot">2</span>
+          <span class="step-label">Tell us about it</span>
+        </button>
+        <button class="step" data-step="2">
+          <span class="step-dot">3</span>
+          <span class="step-label">Review and ship</span>
+        </button>
+      </nav>
+
+      <div class="auth-status">
+        <div class="auth-badge not-authed" id="authBadge">
+          <span class="auth-dot"></span>
+          <span id="authText">Not connected</span>
+        </div>
+        <button class="btn-ghost hidden" id="signOutBtn">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <!-- Step 0: connect -->
+      <section class="panel step-panel active" id="panel-0">
+        <h2>Connect your GitHub account</h2>
+        <p class="muted">
+          The studio creates a new repository and pushes your files to it, so it
+          needs permission to work on your account. Nothing is touched until you
+          hit Ship.
+        </p>
+        <a href="/auth" class="btn btn-primary" id="loginBtn">
+          Continue with GitHub
+        </a>
+      </section>
+
+      <!-- Step 1: details -->
+      <section class="panel step-panel" id="panel-1">
+        <h2>Project details</h2>
+        <p class="muted">
+          These drive the README that gets generated in your repo. The README
+          sections below are pre-filled, and you can edit them before shipping.
+        </p>
+
+        <form id="projectForm" autocomplete="off">
+          <div class="field">
+            <label for="repoName">Repository name</label>
+            <input type="text" id="repoName" placeholder="my-stardance-project" required>
+            <span class="field-note">Lowercase letters, numbers, hyphens. No spaces.</span>
+          </div>
+
+          <div class="field">
+            <label for="projectName">Project name</label>
+            <input type="text" id="projectName" placeholder="My Stardance Project" required>
+          </div>
+
+          <div class="field">
+            <label for="tagline">One-line description</label>
+            <input type="text" id="tagline" placeholder="What it is, in a single sentence">
+          </div>
+
+          <div class="field">
+            <label for="description">Long description</label>
+            <textarea id="description" rows="5"
+              placeholder="A paragraph about what you built and why."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="tagsInput">Tags</label>
+            <input type="text" id="tagsInput" placeholder="web, game, hardware">
+            <div class="tags" id="tagsList"></div>
+          </div>
+
+          <div class="section-block">
+            <h3>Project files</h3>
+            <p class="muted small">
+              Nothing is generated for you. Upload your own index.html,
+              style.css, app.js, or anything else the project needs. Hold
+              Command (or Ctrl) to pick several, up to 5 MB each.
+            </p>
+            <input type="file" id="fileInput" multiple>
+            <ul class="file-list" id="fileList"></ul>
+            <span class="field-note" id="uploadError"></span>
+          </div>
+
+          <details class="section-block" open>
+            <summary>README sections</summary>
+            <p class="muted small">
+              These fill in the generated README.md. Clear a field to drop
+              that section. Features are one bullet per line.
+            </p>
+
+            <div class="field">
+              <label for="secWhat">What is this?</label>
+              <textarea id="secWhat" rows="3"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="secHow">How to run it</label>
+              <textarea id="secHow" rows="3"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="secFeatures">Features</label>
+              <textarea id="secFeatures" rows="5"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="secAbout">About</label>
+              <textarea id="secAbout" rows="3"></textarea>
+            </div>
+
+            <div class="field">
+              <label for="secMade">Made for</label>
+              <textarea id="secMade" rows="2"></textarea>
+            </div>
+          </details>
+        </form>
+      </section>
+
+      <!-- Step 2: review and ship -->
+      <section class="panel step-panel" id="panel-2">
+        <h2>Review and ship</h2>
+        <p class="muted">
+          Your uploaded files plus a generated README.md are pushed to a fresh
+          public repo.
+        </p>
+
+        <div class="repo-preview" id="repoPreview">
+          <div class="preview-line">
+            <span class="preview-label">Repository</span>
+            <span class="preview-value" id="previewRepo">owner/name</span>
+          </div>
+          <div class="preview-line">
+            <span class="preview-label">Files</span>
+            <span class="preview-value" id="previewFiles">README.md</span>
+          </div>
+        </div>
+
+        <div class="progress-wrap hidden" id="progressWrap">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <span class="progress-text" id="progressText">Starting...</span>
+        </div>
+
+        <button class="btn btn-primary" id="shipBtn" disabled>Ship to GitHub</button>
+
+        <div class="result hidden" id="result">
+          <h3 id="resultTitle"></h3>
+          <p id="resultMessage"></p>
+          <a href="#" class="btn btn-ghost hidden" id="repoLink" target="_blank" rel="noopener">
+            Open repository
+          </a>
+        </div>
+      </section>
+
+      <!-- Live markdown preview, shown beside the editor -->
+      <aside class="preview-pane">
+        <div class="preview-head">
+          <div class="preview-left">
+            <span class="traffic" aria-hidden="true">
+              <i class="t-close"></i><i class="t-min"></i><i class="t-max"></i>
+            </span>
+            <span>README.md</span>
+          </div>
+          <span class="preview-live">live</span>
+        </div>
+        <article class="markdown" id="preview"></article>
+        <div class="preview-empty" id="previewEmpty">
+          Fill in the form and the README preview builds itself here.
+        </div>
+      </aside>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
