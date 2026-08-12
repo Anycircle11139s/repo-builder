@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stardance Project Studio</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="window">
+    <div class="titlebar">
+      <div class="traffic">
+        <span class="red"></span>
+        <span class="yellow"></span>
+        <span class="green"></span>
+      </div>
+      <div class="window-title">Stardance Project Studio</div>
+    </div>
+    <div class="content">
+
+      <div class="auth-row">
+        <span id="authBadge"><span id="authText">Not connected</span></span>
+        <button id="signOutBtn" class="hidden" type="button">Sign out</button>
+        <a id="loginLink" href="/auth">Sign in with GitHub</a>
+      </div>
+
+      <nav id="stepNav">
+        <button class="step active" data-step="0" type="button">Project</button>
+        <button class="step" data-step="1" type="button">Files</button>
+        <button class="step" data-step="2" type="button">README</button>
+        <button class="step" data-step="3" type="button">Ship</button>
+      </nav>
+
+      <section class="step-panel active" id="panel-0">
+        <h2>Project</h2>
+
+        <div class="field">
+          <label for="repoName">Repository name</label>
+          <input type="text" id="repoName" placeholder="my-stardance-project">
+          <p class="hint">Used as-is on GitHub: lowercase letters, numbers and hyphens.</p>
+        </div>
+
+        <div class="field">
+          <label for="projectName">Project name</label>
+          <input type="text" id="projectName" placeholder="Stardance Project">
+        </div>
+
+        <div class="field">
+          <label for="tagline">Tagline</label>
+          <input type="text" id="tagline" placeholder="A web thing I built for Stardance">
+        </div>
+
+        <div class="field">
+          <label for="description">Description</label>
+          <textarea id="description" rows="3" placeholder="A couple of sentences about the project."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="tagsInput">Tags</label>
+          <input type="text" id="tagsInput" placeholder="Type a tag and press Enter">
+          <div id="tagsList"></div>
+        </div>
+      </section>
+
+      <section class="step-panel" id="panel-1">
+        <h2>Project files</h2>
+
+        <div class="field">
+          <label for="addFilesBtn">Your files</label>
+          <button id="addFilesBtn" type="button">Add files…</button>
+          <input type="file" id="fileInput" multiple hidden>
+          <ul id="fileList" class="hidden"></ul>
+          <p class="hint">Upload the files you want pushed: index.html, style.css, app.js, images, anything. README.md is generated for you and can't be uploaded.</p>
+        </div>
+      </section>
+
+      <section class="step-panel" id="panel-2">
+        <h2>README</h2>
+
+        <div class="field">
+          <label for="sectWhat">What is this?</label>
+          <textarea id="sectWhat" rows="3"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="sectHow">How to run it</label>
+          <textarea id="sectHow" rows="3"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="sectFeatures">Features (one per line)</label>
+          <textarea id="sectFeatures" rows="5"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="sectAbout">About</label>
+          <textarea id="sectAbout" rows="3"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="madeFor">Footer line</label>
+          <input type="text" id="madeFor">
+        </div>
+
+        <h3>Live preview</h3>
+        <div id="preview"></div>
+        <p id="previewEmpty" class="hint">Your README preview will appear here as you type.</p>
+      </section>
+
+      <section class="step-panel" id="panel-3">
+        <h2>Ship it</h2>
+
+        <p>Creates a public repository at <span id="previewRepo">...</span> and pushes your files.</p>
+
+        <button id="shipBtn" type="button" disabled>Ship to GitHub</button>
+
+        <div id="progressWrap" class="hidden">
+          <div><div id="progressFill"></div></div>
+          <p id="progressText"></p>
+        </div>
+
+        <div id="result" class="hidden">
+          <h3 id="resultTitle"></h3>
+          <p id="resultMessage"></p>
+          <a id="repoLink" class="hidden" href="#" target="_blank" rel="noopener">Open repository</a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

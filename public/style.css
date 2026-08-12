@@ -1,0 +1,185 @@
+/* Stardance Project Studio - macOS-style black & white theme */
+:root {
+  --bg: #e8e8ed;
+  --panel: #ffffff;
+  --border: #d1d1d6;
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Optional macOS window frame */
+.window {
+  max-width: 1000px;
+  margin: 32px auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+.titlebar {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: #fafafa;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.traffic { display: flex; gap: 8px; }
+.traffic span { width: 12px; height: 12px; border-radius: 50%; }
+.traffic .red { background: #ff5f57; }
+.traffic .yellow { background: #febc2e; }
+.traffic .green { background: #28c840; }
+.window-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.content { padding: 24px; }
+
+/* Segmented step control */
+#stepNav { display: flex; gap: 4px; background: #f0f0f5; border: 1px solid var(--border); border-radius: 9px; padding: 3px; margin-bottom: 24px; }
+#stepNav .step {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+}
+#stepNav .step.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
+#stepNav .step:disabled { opacity: 0.5; cursor: default; }
+
+.step-panel { display: none; }
+.step-panel.active { display: block; }
+
+/* Fields */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.field input[type="text"], .field textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font: inherit;
+  background: #fff;
+  color: var(--text);
+}
+.field textarea { resize: vertical; min-height: 60px; }
+.field input:focus, .field textarea:focus {
+  outline: none;
+  border-color: #000;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+.hint { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+
+/* Buttons */
+button {
+  font: inherit;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  padding: 7px 14px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+button:hover { background: #f2f2f5; }
+button:active { background: #e5e5ea; }
+button:disabled { opacity: 0.5; cursor: default; }
+#shipBtn { background: #000; color: #fff; border-color: #000; font-weight: 500; }
+#shipBtn:hover { background: #333; }
+#shipBtn:disabled { background: #000; opacity: 0.35; }
+
+/* Auth badge */
+#authBadge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 999px;
+  border: 1px solid var(--border); font-size: 12px;
+}
+#authBadge.authed { border-color: #000; }
+#authBadge.error { border-color: #d70015; color: #d70015; }
+
+/* Tags */
+#tagsList .tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #000; color: #fff;
+  font-size: 12px; padding: 4px 10px; border-radius: 999px;
+  margin: 0 6px 6px 0;
+}
+#tagsList .tag button { background: transparent; border: none; color: #fff; padding: 0; font-size: 12px; }
+#tagsList .tag button:hover { color: #d0d0d0; }
+
+/* Uploaded file list */
+#fileList { list-style: none; padding: 0; margin: 10px 0 0; }
+#fileList li {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: 7px;
+  margin-bottom: 6px; background: #fafafa; font-size: 13px;
+}
+#fileList li button { padding: 3px 10px; font-size: 12px; }
+
+/* Preview */
+#preview {
+  border: 1px solid var(--border); border-radius: 9px;
+  padding: 18px 22px; background: #fff; min-height: 120px;
+}
+#preview h1 { font-size: 22px; margin: 0 0 10px; }
+#preview h2 { font-size: 16px; margin: 20px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+#preview p { margin: 0 0 10px; }
+#preview ul { margin: 0 0 10px; padding-left: 22px; }
+#preview code { background: #f0f0f5; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+/* Progress */
+#progressWrap { margin: 14px 0; }
+#progressFill {
+  height: 8px; width: 0; background: #000; border-radius: 999px;
+  transition: width 0.2s ease;
+}
+#progressWrap > div:first-of-type {
+  height: 8px; background: #ececf1; border-radius: 999px; overflow: hidden;
+}
+#progressText { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* Result */
+#result { border: 1px solid var(--border); border-radius: 9px; padding: 16px; margin-top: 16px; background: #fafafa; }
+#result h3 { margin: 0 0 6px; font-size: 15px; }
+#result p { margin: 0 0 10px; color: var(--muted); }
+#result a { color: #000; }
+
+.hidden { display: none !important; }
+
+.auth-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+#loginLink {
+  font: inherit;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--text);
+  text-decoration: none;
+}
+#loginLink:hover { background: #f2f2f5; }

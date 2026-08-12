@@ -1,0 +1,522 @@
+(function () {
+  'use strict';
+
+  // DOM helpers -----------------------------------------------------------
+  const byId = (id) => document.getElementById(id);
+
+  const els = {
+    stepNav: byId('stepNav'),
+    steps: document.querySelectorAll('.step'),
+    panels: document.querySelectorAll('.step-panel'),
+    authBadge: byId('authBadge'),
+    authText: byId('authText'),
+    signOutBtn: byId('signOutBtn'),
+    loginHint: byId('loginHint'),
+
+    repoName: byId('repoName'),
+    projectName: byId('projectName'),
+    tagline: byId('tagline'),
+    description: byId('description'),
+    tagsInput: byId('tagsInput'),
+    tagsList: byId('tagsList'),
+
+    preview: byId('preview'),
+    previewEmpty: byId('previewEmpty'),
+
+    previewRepo: byId('previewRepo'),
+    shipBtn: byId('shipBtn'),
+    progressWrap: byId('progressWrap'),
+    progressFill: byId('progressFill'),
+    progressText: byId('progressText'),
+    result: byId('result'),
+    resultTitle: byId('resultTitle'),
+    resultMessage: byId('resultMessage'),
+    repoLink: byId('repoLink'),
+  };
+
+  // State ----------------------------------------------------------------
+  let token = localStorage.getItem('sd_token') || null;
+  let username = localStorage.getItem('sd_username') || null;
+  let tags = [];
+
+  const currentYear = new Date().getFullYear();
+
+  // Auth -----------------------------------------------------------------
+  // If GitHub bounced us back with a code, trade it for a token right away,
+  // then scrub the URL so the code never sits in the address bar.
+  function handleconst params = new URLSearchParams(window.location.search);
+...
+fetch('/callback', {const params = new URLSearchParams(window.location.search);
+...
+fetch('/callback', {
+Callback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    const error = params.get('error');
+
+    if (error) {
+      setAuthError('Authorization was cancelled or refused.');
+    }
+
+    if (!code) {
+      return;
+    }
+
+    // Remove the query string from the history and the location bar.
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+
+    setAuthState('Connecting...');
+
+    fetch('/callback?code=' + encodeURIComponent(code))
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (data) {
+        if (data.access_token) {
+          token = data.access_token;
+          localStorage.setItem('sd_token', token);
+          setAuthState('Connected');
+          resolveProfile();
+          goToStep(1);
+        } else {
+          setAuthError(data.error || 'Could not finish the sign in.');
+        }
+      })
+      .catch(function () {
+        setAuthError('Could not reach the auth server.');
+      });
+  }
+
+  function setAuthState(text) {
+    els.authText.textContent = text;
+    els.authBadge.classList.add('authed');
+    els.authBadge.classList.remove('error');
+    els.signOutBtn.classList.remove('hidden');
+  }
+
+  function setAuthError(text) {
+    els.authText.textContent = text;
+    els.authBadge.classList.add('error');
+    els.authBadge.classList.remove('authed');
+  }
+
+  function signOut() {
+    token = null;
+    username = null;
+    localStorage.removeItem('sd_token');
+    localStorage.removeItem('sd_username');
+    els.authText.textContent = 'Not connected';
+    els.authBadge.classList.remove('authed', 'error');
+    els.signOutBtn.classList.add('hidden');
+    lockShip();
+  }
+
+  // Ask GitHub who we are so we can build the repo under the right owner.
+  // Fall back to the app owner if this fails so the flow can continue.
+  function resolveProfile() {
+    if (!token) return;
+
+    const headers = {
+      Authorization: 'Bearer ' + token,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+
+    fetch('https://api.github.com/user', { headers: headers })
+      .then(function (res) {
+        if (!res.ok) throw new Error('user');
+        return res.json();
+      })
+      .then(function (user) {
+        username = user.login;
+        localStorage.setItem('sd_username', username);
+        persistProfile();
+      })
+      .catch(function () {
+        // Keep going with whatever we have. GitHub will reject if the token
+        // is truly bad, which is the real signal anyway.
+        persistProfile();
+      });
+  }
+
+  function persistProfile() {
+    const name = els.repoName.value.trim() || 'my-stardance-project';
+    els.previewRepo.textContent = (username ? username + '/' : '') + name;
+  }
+
+  // Steps ----------------------------------------------------------------
+  function goToStep(index) {
+    els.steps.forEach(function (step, i) {
+      step.classList.toggle('active', i === index);
+    });
+    els.panels.forEach(function (panel, i) {
+      panel.classList.toggle('active', i === index);
+    });
+  }
+
+  els.stepNav.addEventListener('click', function (e) {
+    const btn = e.target.closest('.step');
+    if (!btn) return;
+    const index = parseInt(btn.dataset.step, 10);
+    // Do not let them skip ahead of the auth step before signing in.
+    if (index > 0 && !token) return;
+    goToStep(index);
+  });
+
+  // Tags -----------------------------------------------------------------
+  function addTag(value) {
+    value = value.trim().replace(/^#/, '').toLowerCase();
+    if (!value || tags.indexOf(value) !== -1) return;
+    tags.push(value);
+    renderTags();
+    renderPreview();
+  }
+
+  function removeTag(value) {
+    tags = tags.filter(function (t) { return t !== value; });
+    renderTags();
+    renderPreview();
+  }
+
+  function renderTags() {
+    els.tagsList.innerHTML = '';
+    tags.forEach(function (tag) {
+      const el = document.createElement('span');
+      el.className = 'tag';
+      el.textContent = tag + ' ';
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = 'x';
+      remove.setAttribute('aria-label', 'Remove ' + tag);
+      remove.addEventListener('click', function () { removeTag(tag); });
+
+      el.appendChild(remove);
+      els.tagsList.appendChild(el);
+    });
+  }
+
+  els.tagsInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(els.tagsInput.value);
+      els.tagsInput.value = '';
+    }
+  });
+
+  els.tagsInput.addEventListener('blur', function () {
+    if (els.tagsInput.value.trim()) {
+      addTag(els.tagsInput.value);
+      els.tagsInput.value = '';
+    }
+  });
+
+  // Markdown generation --------------------------------------------------
+  // Any change to a field rebuilds the README. Conservative escaping keeps
+  // user input from breaking the markdown or injecting HTML.
+  function escapeMd(text) {
+    return String(text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function renderPreview() {
+    const project = els.projectName.value.trim() || 'My Stardance Project';
+    const tagline = els.tagline.value.trim();
+    const description = els.description.value.trim();
+    const repo = els.repoName.value.trim() || 'my-stardance-project';
+
+    const md = buildMarkdown(project, tagline, description, repo, tags);
+    const html = simpleMarkdown(md);
+
+    els.preview.innerHTML = html;
+
+    const filled = els.projectName.value.trim() || els.description.value.trim();
+    els.previewEmpty.classList.toggle('hidden', Boolean(filled));
+
+    persistProfile();
+    refreshShipState();
+  }
+
+  function buildMarkdown(project, tagline, description, repo, tagList) {
+    const lines = [];
+
+    lines.push('# ' + escaped(project));
+    if (tagline) lines.push('');
+    if (tagline) lines.push('*' + escapeMd(tagline) + '*');
+    lines.push('');
+
+    if (description) {
+      lines.push(description.replace(/\n/g, '\n\n'));
+      lines.push('');
+    }
+
+    lines.push('## What is this?');
+    lines.push('');
+    lines.push('A project built for Hack Club Stardance, an online summer program where teens build technical projects and ship them to the world.');
+    lines.push('');
+
+    lines.push('## How to run it');
+    lines.push('');
+    lines.push('Open ' + '`index.html`' + ' in a browser. The live preview in the studio is the same markdown that this README renders from.');
+    lines.push('');
+
+    lines.push('## Features');
+    lines.push('');
+    const features = [
+      'Live markdown preview that rebuilds as you type',
+      'Tag list with add and remove',
+      'Zero dependency backend for GitHub auth',
+      'Sequential push of every file to a new repo',
+    ];
+    features.forEach(function (f) { lines.push('- ' + f); });
+    lines.push('');
+
+    if (tagList.length) {
+      lines.push('## Tags');
+      lines.push('');
+      lines.push('`' + tagList.join('`, `') + '`');
+      lines.push('');
+    }
+
+    lines.push('## About');
+    lines.push('');
+    lines.push('Built with plain HTML, CSS and JavaScript. The backend is a small Express server that handles GitHub OAuth so the client secret never reaches the browser.');
+    lines.push('');
+    lines.push('Made for Hack Club Stardance, ' + currentYear + '.');
+    lines.push('');
+
+    return lines.join('\n');
+  }
+
+  function escaped(text) {
+    return escapeMd(text).replace(/\\/g, '');
+  }
+
+  // A tiny markdown renderer, just enough for the README we generate.
+  // It is intentionally limited, not a full CommonMark implementation.
+  function simpleMarkdown(md) {
+    let out = '';
+
+    const lines = md.split('\n');
+    let inList = false;
+    let inCode = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (line.trim() === '```') {
+        inCode = !inCode;
+        if (!inCode) out += '</code></pre>';
+        continue;
+      }
+
+      if (inCode) {
+        out += '<code>' + escapeHtml(line) + '</code>\n';
+        continue;
+      }
+
+      if (line.startsWith('# ')) {
+        out += '<h1>' + inline(line.slice(2)) + '</h1>\n';
+      } else if (line.startsWith('## ')) {
+        out += '<h2>' + inline(line.slice(3)) + '</h2>\n';
+      } else if (line.startsWith('- ')) {
+        if (!inList) { out += '<ul>\n'; inList = true; }
+        out += '<li>' + inline(line.slice(2)) + '</li>\n';
+      } else if (line.trim() === '') {
+        if (inList) { out += '</ul>\n'; inList = false; }
+      } else {
+        out += '<p>' + inline(line) + '</p>\n';
+      }
+    }
+
+    if (inList) out += '</ul>\n';
+    return out;
+  }
+
+  function inline(text) {
+    return escapeHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code>$1</code>');
+  }
+
+  function escapeHtml(text) {
+    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Wire up every input to rebuild the preview immediately.
+  ['repoName', 'projectName', 'tagline', 'description'].forEach(function (id) {
+    byId(id).addEventListener('input', renderPreview);
+  });
+
+  els.repoName.addEventListener('input', persistProfile);
+
+  // Shipping -------------------------------------------------------------
+  function lockShip() {
+    els.shipBtn.disabled = true;
+  }
+
+  function refreshShipState() {
+    const ready = Boolean(
+      token &&
+      username &&
+      els.repoName.value.trim() &&
+      els.projectName.value.trim()
+    );
+    els.shipBtn.disabled = !ready;
+  }
+
+  // Reliable string to base64 for the GitHub contents API. This handles
+  // emoji and other multibyte characters that plain btoa would break on.
+  function toBase64(str) {
+    // UTF-8 encode the string first, then base64 it.
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+  }
+
+  async function githubFetch(url, options) {
+    const headers = {
+      Authorization: 'Bearer ' + token,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(options.headers || {}),
+    };
+
+    const res = await fetch(url, Object.assign({}, options, { headers: headers }));
+
+    const body = await res.json().catch(function () { return {}; });
+
+    if (!res.ok) {
+      const detail = body.message || 'GitHub returned ' + res.status;
+      const error = new Error(detail);
+      error.status = res.status;
+      throw error;
+    }
+    return body;
+  }
+
+  function setProgress(percent, text) {
+    els.progressWrap.classList.remove('hidden');
+    els.progressFill.style.width = percent + '%';
+    els.progressText.textContent = text;
+  }
+
+  async function ship() {
+    lockShip();
+    els.result.classList.add('hidden');
+
+    const repo = els.repoName.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const project = els.projectName.value.trim();
+    const tagline = els.tagline.value.trim();
+    const description = els.description.value.trim();
+
+    const files = {
+      'README.md': buildMarkdown(project, tagline, description, repo, tags),
+      'index.html': '<!-- Generated by Stardance Project Studio -->\n' +
+        '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="UTF-8">\n' +
+        '<title>' + escapeHtml(project) + '</title>\n</head>\n<body>\n' +
+        '<h1>' + escapeHtml(project) + '</h1>\n' +
+        (description ? '<p>' + escapeHtml(description) + '</p>\n' : '') +
+        '</body>\n</html>\n',
+      'style.css': 'body { font-family: sans-serif; margin: 2rem auto; max-width: 46rem; padding: 0 1rem; }\n',
+      'app.js': '"use strict";\n// Main entry point for your project.\n',
+    };
+
+    try {
+      setProgress(4, 'Resolving your profile');
+      if (!username) {
+        await resolveProfile();
+      }
+
+      setProgress(12, 'Creating repository: ' + repo);
+
+      const repoData = await githubFetch('https://api.github.com/user/repos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: repo,
+          description: tagline || project,
+          'private': false,
+          auto_init: true,
+        }),
+      });
+
+      // GitHub creates the repo asynchronously behind the scenes. Give it a
+      // moment so the initial commit and default branch exist before we write.
+      await new Promise(function (resolve) { setTimeout(resolve, 1200); });
+
+      const owner = repoData.owner.login;
+      const repoFull = owner + '/' + repo;
+
+      pendingMessage = 'Repository ready at ' + repoFull + '. Pushing files.';
+      els.previewRepo.textContent = repoFull;
+
+      let done = 0;
+      const total = Object.keys(files).length;
+
+      // Push each file one after another. Sequential matters here because
+      // each PUT needs the default branch to already exist, which is why we
+      // waited after creating the repo.
+      for (const name of Object.keys(files)) {
+        done += 1;
+        const percent = 30 + Math.round((done / total) * 60);
+        setProgress(percent, 'Writing ' + name);
+
+        const contentEncoded = toBase64(files[name]);
+
+        await githubFetch(
+          'https://api.github.com/repos/' + repoFull + '/contents/' + name,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: 'Add ' + name,
+              content: contentEncoded,
+            }),
+          }
+        );
+      }
+
+      setProgress(100, 'Done');
+
+      els.resultTitle.textContent = 'Shipped';
+      els.resultMessage.textContent = 'Your repository is live and public.';
+      els.repoLink.classList.remove('hidden');
+      els.repoLink.href = 'https://github.com/' + repoFull;
+      els.result.classList.remove('hidden');
+    } catch (err) {
+      els.resultTitle.textContent = 'Something went wrong';
+      els.resultMessage.textContent = err.message || 'The push failed. Check that the repo name is free and try again.';
+      els.result.classList.remove('hidden');
+      refreshShipState();
+    }
+  }
+
+  let pendingMessage = '';
+
+  els.shipBtn.addEventListener('click', ship);
+  els.signOutBtn.addEventListener('click', signOut);
+
+  // Boot ---------------------------------------------------------------
+  if (token) {
+    setAuthState('Connected');
+    resolveProfile();
+    goToStep(1);
+  } else {
+    lockShip();
+  }
+
+  handleCallback();
+
+  // Make the tag and repo name state visible to markup that references it,
+  // and run a first render so empty states look right.
+  renderPreview();
+
+})();
