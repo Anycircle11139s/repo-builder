@@ -1,6 +1,6 @@
 # Repo-Builder
 
-*A tool that helps you create github repositories.*
+**A tool that helps you create github repositories.**
 
 An interactive repository builder that allows you to build READMEs and upload files with ease. The tool authenticates with github and can create/edit repositories itself.
 
@@ -10,25 +10,30 @@ A repository builder which authenticates with github and allows you to create yo
 
 ## How to run it
 
-1. Make sure you have a GitHub OAuth app registered. Go to https://github.com/settings/applications/new and create one:
+1. Make sure you have a GitHub OAuth app registered. Go to <https://github.com/settings/applications/new> and create one:
 
-Homepage URL: http://localhost:3000
-Authorization callback URL: http://localhost:3000/callback
+`Homepage URL: http://localhost:3000`
+
+`Authorization callback URL: http://localhost:3000/callback`
+
 After registering, GitHub shows you the Client ID and the Client Secret. Copy both.
 
 2. Create .env in the project root the folder that contains server.js, not inside public:
 
-cd ~/stardance-studio
-touch .env
+`cd ~/stardance-studio`
+
+`touch .env`
 
 Open it in a text editor (or nano .env in the terminal) and paste:
 
-GITHUB_CLIENT_ID=your_client_id_here
-GITHUB_CLIENT_SECRET=your_client_secret_here
-CALLBACK_URL=http://localhost:3000/callback
+`GITHUB_CLIENT_ID=your_client_id_here`
 
-3. Start the server
-Node server.js
+`GITHUB_CLIENT_SECRET=your_client_secret_here`
+
+`CALLBACK_URL=http://localhost:3000/callback`
+
+3. Start the server: 
+`Node server.js`
 
 ## Features
 
@@ -39,7 +44,7 @@ Node server.js
 - Live README preview as you type, rendered right in the browser
 - Handles the auto-init README GitHub drops into fresh repos, so the first push doesn't fail
 - Session persists across reloads and tabs, so you don't re-auth for every ship
-- macOS-style black-and-white UI, clean three-step flow, responsive down to phones
+- macOS-style black and white UI
 
 ## Tags
 
