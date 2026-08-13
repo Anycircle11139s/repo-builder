@@ -41,9 +41,7 @@
 
   const currentYear = new Date().getFullYear();
 
-  // Auth -----------------------------------------------------------------
-  // If GitHub bounced us back with a code, trade it for a token right away,
-  // then scrub the URL so the code never sits in the address bar.
+
   function handleconst params = new URLSearchParams(window.location.search);
 ...
 fetch('/callback', {const params = new URLSearchParams(window.location.search);
@@ -112,8 +110,7 @@ Callback() {
     lockShip();
   }
 
-  // Ask GitHub who we are so we can build the repo under the right owner.
-  // Fall back to the app owner if this fails so the flow can continue.
+
   function resolveProfile() {
     if (!token) return;
 
@@ -134,8 +131,7 @@ Callback() {
         persistProfile();
       })
       .catch(function () {
-        // Keep going with whatever we have. GitHub will reject if the token
-        // is truly bad, which is the real signal anyway.
+
         persistProfile();
       });
   }
