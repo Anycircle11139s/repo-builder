@@ -29,6 +29,6 @@ The website is run by hack club Nest, so all you have to do is visit the website
 
 ## About
 
-Built with plain HTML, CSS and JavaScript. The backend is a small Express server that handles GitHub OAuth so the client secret never reaches the browser.
+Built with plain HTML, CSS and JavaScript. 
 
 Made for Hack Club Stardance, 2026 by @NotALarp
