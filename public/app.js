@@ -121,7 +121,6 @@
     lockShip();
   }
 
-  // Returns a promise now, so `await resolveProfile()` actually waits.
   function resolveProfile() {
     if (!token) return Promise.resolve();
 
@@ -220,7 +219,7 @@
   // Uploaded files -------------------------------------------------------
   function addFiles(fileList) {
     Array.from(fileList || []).forEach(function (file) {
-      if (file.name === 'README.md') return; // reserved, generated for you
+      if (file.name === 'README.md') return; 
       if (uploads.some(function (u) { return u.name === file.name; })) return;
 
       const reader = new FileReader();
@@ -335,7 +334,6 @@
     refreshShipState();
   }
 
-  // Tiny markdown renderer, same as before.
   function simpleMarkdown(md) {
     let out = '';
     const lines = md.split('\n');
@@ -450,7 +448,6 @@
     const tagline = els.tagline.value.trim();
     const description = els.description.value.trim();
 
-    // README is generated; everything else is the user's own uploads.
     const files = {};
     files['README.md'] = toBase64(buildMarkdown(project, tagline, description, repo, tags));
     uploads.forEach(function (u) { files[u.name] = u.base64; });
@@ -486,8 +483,7 @@
         const percent = 30 + Math.round((done / total) * 60);
         setProgress(percent, 'Writing ' + name);
 
-        // GitHub requires the sha of an existing file to overwrite it
-        // (auto_init created a README that we replace). New files get no sha.
+
         let sha = '';
         const existing = await githubFetch(
           'https://api.github.com/repos/' + repoFull + '/contents/' + encodeURIComponent(name),
@@ -497,7 +493,7 @@
 
         const payload = {
           message: 'Add ' + name,
-          content: files[name], // already base64
+          content: files[name], 
         };
         if (sha) payload.sha = sha;
 
