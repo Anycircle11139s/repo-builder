@@ -10,7 +10,7 @@ A repository builder which authenticates with github and allows you to create yo
 
 ## How to run it
 
-The website is run by hack club Nest, so all you have to do is visit the website at <repobuilder.hackclub.app> to create your repositories with ease.
+The website is run by hack club Nest, so all you have to do is visit the website at repobuilder.hackclub.app to create your repositories with ease.
 
 ## Features
 
