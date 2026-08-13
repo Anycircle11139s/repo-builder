@@ -17,7 +17,6 @@ body {
   color: var(--text);
 }
 
-/* Optional macOS window frame */
 .window {
   max-width: 1000px;
   margin: 32px auto;
